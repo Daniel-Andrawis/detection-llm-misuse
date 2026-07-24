@@ -1,0 +1,41 @@
+rule llm_api_key_abuse_burst {
+
+  // Detection intent:
+  // A single source IP driving high-volume LLM inference across many distinct
+  // API keys inside a short window. This pattern indicates automated abuse or
+  // key rotation/credential stuffing against an inference endpoint, rather than
+  // a single legitimate integration (which uses one, stable key).
+  //
+  // Log model: LLM gateway access logs normalized to UDM NETWORK_HTTP events.
+  // The gateway is expected to emit a hashed key identifier in
+  // additional.fields["api_key_id"] (never the raw key).
+
+  meta:
+    author       = "Daniel Andrawis"
+    description  = "Single source IP fanning high-volume LLM inference across many distinct API keys in a short window (automated abuse / credential rotation)."
+    severity     = "MEDIUM"
+    mitre_atlas  = "AML.T0040"  // ML Model Inference API Access — verify against live ATLAS matrix
+    reference    = "https://atlas.mitre.org/techniques/AML.T0040"
+    status       = "experimental"
+    data_source  = "llm_gateway"
+
+  events:
+    $e.metadata.event_type = "NETWORK_HTTP"
+    re.regex($e.target.url, `/v1/(chat/completions|messages|complete)$`)
+    $e.principal.ip = $ip
+    $e.additional.fields["api_key_id"] != ""
+
+  match:
+    $ip over 5m
+
+  outcome:
+    $request_count     = count($e.metadata.id)
+    $distinct_api_keys = count_distinct($e.additional.fields["api_key_id"])
+    $risk_score = max(
+      if($distinct_api_keys >= 25, 90, 0),
+      if($request_count >= 500, 75, 0)
+    )
+
+  condition:
+    $e and $distinct_api_keys >= 10 and $request_count >= 200
+}
