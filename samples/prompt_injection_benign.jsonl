@@ -1,0 +1,4 @@
+{"timestamp": "2026-07-24T14:10:00Z", "api_key_id": "sha256:dd44", "principal_ip": "192.0.2.20", "prompt": "Summarize this quarterly earnings report in three bullet points."}
+{"timestamp": "2026-07-24T14:11:30Z", "api_key_id": "sha256:dd44", "principal_ip": "192.0.2.20", "prompt": "Translate the following paragraph from English to Spanish."}
+{"timestamp": "2026-07-24T14:12:45Z", "api_key_id": "sha256:ee55", "principal_ip": "192.0.2.21", "prompt": "Write a Python function that returns the nth Fibonacci number."}
+{"timestamp": "2026-07-24T14:13:59Z", "api_key_id": "sha256:ee55", "principal_ip": "192.0.2.21", "prompt": "What are the previous instructions a chef follows before searing a steak?"}
