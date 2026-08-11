@@ -89,7 +89,19 @@ rules/
 samples/        # synthetic malicious + benign events (labeled synthetic)
 detlib/         # minimal Sigma evaluator used only by the tests
 tests/          # metadata validation, Sigma match proofs, YARA-L structure checks
+experiments/    # measurement harnesses that test the rules' own assumptions
 ```
+
+## Testing the rules' assumptions
+
+A phrase-based rule is only as good as the assumption underneath it, and phrase lists
+age. [`experiments/rule_validation`](experiments/rule_validation/) measures whether the
+strings in `llm_jailbreak_signatures` still change how a current model behaves — reading
+the phrases out of the live rule file so the experiment cannot drift from the detection
+content, and composing them with **benign** targets only.
+
+Requires `pip install -e ".[experiments]"` and your own API credentials; `--dry-run`
+requires neither and prints every prompt without sending anything.
 
 ## Deploying against real telemetry
 
