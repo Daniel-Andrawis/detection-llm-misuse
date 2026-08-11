@@ -24,3 +24,6 @@ env/
 .DS_Store
 .idea/
 .vscode/
+
+# Research logs — force-add deliberately when publishing a finding
+experiments/**/results/*.jsonl
