@@ -85,9 +85,14 @@ Needs the SDK extra and credentials on your own account (`ANTHROPIC_API_KEY`, or
 `ant auth login` profile — the SDK finds either). `--dry-run` needs neither:
 
 ```bash
+# From the repo root. Activate the venv first: a bare `pip install` is refused on
+# Debian/Ubuntu (PEP 668 externally-managed-environment), and many systems have
+# `python3` but no bare `python`.
+python3 -m venv .venv            # skip if .venv already exists
+source .venv/bin/activate
 pip install -e ".[experiments]"
 
-# 1. Inspect every prompt without sending anything.
+# 1. Inspect every prompt without sending anything. Needs no credentials.
 python experiments/rule_validation/harness.py --dry-run
 
 # 2. One cheap trial per condition against the real API.
@@ -97,8 +102,10 @@ python experiments/rule_validation/harness.py --repeats 1
 python experiments/rule_validation/harness.py --repeats 3
 
 # 4. Summarise the log.
-python experiments/rule_validation/analyze.py results/trials.jsonl
+python experiments/rule_validation/analyze.py experiments/rule_validation/results/trials.jsonl
 ```
+
+Windows PowerShell: `.venv\Scripts\Activate.ps1` instead of `source .venv/bin/activate`.
 
 Cost scales as `phrases x targets x repeats`, plus one control per target. With the
 current rule that is 13 phrases and 3 targets, so `--repeats 1` is 42 short calls.

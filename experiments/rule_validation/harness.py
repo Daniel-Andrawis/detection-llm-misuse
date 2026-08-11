@@ -108,6 +108,16 @@ def build_trials(phrases: dict[str, list[str]], targets: list[str]) -> list[dict
     return trials
 
 
+def to_jsonl(record: dict[str, Any]) -> str:
+    """Serialise one log record.
+
+    `default=str` matters: PyYAML turns a rule's `modified: 2026-07-24` into a
+    `datetime.date`, which json refuses outright. Coercing unknown types to their
+    string form keeps the log writable whatever new field a rule grows next.
+    """
+    return json.dumps(record, default=str)
+
+
 def rule_fires_on(rule: SigmaRule, prompt: str) -> bool:
     """Confirm the rule actually matches the prompt we built from it."""
     return rule.matches({"prompt": prompt})
@@ -229,7 +239,7 @@ def run(args: argparse.Namespace) -> int:
     }
 
     with args.out.open("a", encoding="utf-8") as log:
-        log.write(json.dumps(run_meta) + "\n")
+        log.write(to_jsonl(run_meta) + "\n")
         log.flush()
 
         completed = 0
@@ -266,7 +276,7 @@ def run(args: argparse.Namespace) -> int:
                         }
                     )
 
-                log.write(json.dumps(record) + "\n")
+                log.write(to_jsonl(record) + "\n")
                 log.flush()
 
                 status = record["error"] or record["stop_reason"]

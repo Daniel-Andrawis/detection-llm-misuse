@@ -74,3 +74,24 @@ def test_one_trial_per_phrase_target_pair_plus_controls():
     trials = build_trials(phrases, BENIGN_TARGETS)
     expected = len(BENIGN_TARGETS) * (1 + sum(len(v) for v in phrases.values()))
     assert len(trials) == expected
+
+
+def test_log_records_survive_yaml_dates():
+    """PyYAML parses `modified: 2026-07-24` into a date, which plain json refuses.
+
+    The whole live run writes nothing if serialisation raises, so this is the
+    difference between a working experiment and a crash on the first trial.
+    """
+    import datetime
+
+    from harness import to_jsonl
+
+    record = {"rule_modified": datetime.date(2026, 7, 24), "selection": "persona_swap"}
+    assert '"2026-07-24"' in to_jsonl(record)
+
+
+def test_real_rule_metadata_is_serialisable():
+    rule = _rule()
+    from harness import to_jsonl
+
+    assert to_jsonl({"id": rule.raw.get("id"), "modified": rule.raw.get("modified")})

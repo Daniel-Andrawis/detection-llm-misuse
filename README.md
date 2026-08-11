@@ -33,8 +33,8 @@ suite proves each rule fires on the former and stays quiet on the latter:
 
 ```console
 $ pytest -q
-..........                                                               [100%]
-10 passed in 0.07s
+..................                                                       [100%]
+18 passed in 0.07s
 ```
 
 Example malicious event caught by `llm_prompt_injection_indicators` (synthetic):
@@ -68,7 +68,7 @@ false positives, and maps to an ATLAS technique.
 ```bash
 git clone https://github.com/Daniel-Andrawis/detection-llm-misuse.git
 cd detection-llm-misuse
-python -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
 ruff check .     # lint
@@ -100,8 +100,8 @@ strings in `llm_jailbreak_signatures` still change how a current model behaves â
 the phrases out of the live rule file so the experiment cannot drift from the detection
 content, and composing them with **benign** targets only.
 
-Requires `pip install -e ".[experiments]"` and your own API credentials; `--dry-run`
-requires neither and prints every prompt without sending anything.
+Requires the `experiments` extra installed in the venv and your own API credentials;
+`--dry-run` needs neither and prints every prompt without sending anything.
 
 ## Deploying against real telemetry
 
