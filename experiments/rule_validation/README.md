@@ -127,6 +127,13 @@ something about where a gateway-layer rule adds value and where it is redundant.
 ## Result — 2026-09-01, claude-sonnet-5
 
 126 trials, 0 errors. 13 phrases x 3 benign targets x 3 repeats, plus 9 controls.
+
+> **Rule version.** This result was measured against `llm_jailbreak_signatures` as
+> of `modified: 2026-07-24` — 13 phrases in 3 selections. The rule was refreshed on
+> 2026-09-01 (new phrase clusters from published corpora, the bare token
+> `jailbreak` removed, severity demoted to `low`) *because* of this result. The run
+> log records `rule_modified`, so the finding stays attributable to the version it
+> tested. Re-running against the refreshed rule is open work, not a repeat.
 Validated against the Claude API (`claude-sonnet-5`, SDK 1.2.0), max_tokens 4096,
 thinking and effort left at API defaults. Raw log: `results/trials.jsonl`.
 

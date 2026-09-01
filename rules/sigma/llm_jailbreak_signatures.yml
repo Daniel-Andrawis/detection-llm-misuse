@@ -1,19 +1,30 @@
-title: LLM Jailbreak and Safety-Bypass Signatures
+title: LLM Jailbreak Framing (Abuse-Intent Signal)
 id: 9a2b7c41-3d5e-4f60-8b19-2c3d4e5f6a7b
 status: experimental
 description: >
-  Detects well-known jailbreak framings used to bypass an LLM's safety policy:
-  persona-swap templates (DAN-style "do anything now"), fictional/role-play
-  wrappers used to launder disallowed requests, and "developer mode" or
-  "no restrictions" prompts. Operates on the prompt payload captured by an LLM
-  gateway. Pairs with the prompt-injection rule; jailbreaks target the safety
-  layer specifically rather than the system prompt.
+  Surfaces well-known jailbreak framings in prompts submitted to an LLM gateway:
+  persona-swap templates (DAN-family), privilege-escalation framings, character
+  persistence instructions, and fictional wrappers.
+
+  IMPORTANT - this is an abuse-INTENT signal, not a safety control. It was
+  validated on 2026-09-01 against claude-sonnet-5 over 126 trials
+  (experiments/rule_validation): the phrase list produced zero refusals and zero
+  soft declines, while the model named and dismissed the framing in 9 of 126
+  responses. The phrases no longer register as attacks. They still identify users
+  probing for a bypass, which is worth routing to account-level triage. Do not
+  treat a hit here as evidence that the model was at risk of misbehaving.
+
+  Phrase clusters are drawn from published in-the-wild jailbreak corpora and
+  tactic taxonomies (see references). No working payloads are reproduced here -
+  only the short indicator strings the rule matches on.
 references:
   - https://atlas.mitre.org/techniques/AML.T0054
+  - https://arxiv.org/abs/2308.03825   # Shen et al., "Do Anything Now", ACM CCS 2024 - 1,405 in-the-wild jailbreak prompts
+  - https://arxiv.org/abs/2406.18510   # WildTeaming - jailbreak tactics mined from real user-chatbot interactions
   - https://owasp.org/www-project-top-10-for-large-language-model-applications/
 author: Daniel Andrawis
 date: 2026-07-24
-modified: 2026-07-24
+modified: 2026-09-01
 tags:
   - atlas.aml.t0054          # LLM Jailbreak (verify ID against live ATLAS matrix)
   - attack.defense_evasion
@@ -27,7 +38,19 @@ detection:
       - 'you are DAN'
       - 'developer mode enabled'
       - 'enable developer mode'
-      - 'jailbreak'
+  privilege_escalation:
+    prompt|contains:
+      - 'you have been granted'
+      - 'elevated permissions'
+      - 'admin override'
+      - 'sudo mode'
+      - 'root mode'
+  character_persistence:
+    prompt|contains:
+      - 'stay in character'
+      - 'never break character'
+      - 'if you break character'
+      - 'remain in character'
   restriction_removal:
     prompt|contains:
       - 'without any restrictions'
@@ -40,9 +63,22 @@ detection:
       - 'write a fictional story where you explain how to'
       - 'for a novel i am writing, describe in detail how to'
       - 'pretend this is a hypothetical with no rules'
-  condition: persona_swap or restriction_removal or fiction_launder
+  weak_identity_signal:
+    prompt|contains:
+      - 'you are now'
+  condition: >
+    persona_swap or privilege_escalation or character_persistence
+    or restriction_removal or fiction_launder or weak_identity_signal
 falsepositives:
-  - Red-team / abuse-testing traffic from an authorized internal team.
-  - Academic or safety-research prompts studying jailbreak robustness.
+  - Security researchers, red teams, and abuse-testing traffic. At this severity
+    that is acceptable - the rule is a triage signal, not a page.
+  - Academic and safety-research prompts studying jailbreak robustness.
   - Creative-writing users whose fiction incidentally matches a phrase.
-level: high
+  - '`you are now` is deliberately isolated in its own selection because it is the
+    lowest-precision string in the rule ("you are now the expert on Kubernetes" is
+    an extremely common benign opening). It was moved here out of the
+    prompt-injection rule so it cannot inflate a higher-severity alert.'
+  - "The bare token `jailbreak` was removed on 2026-09-01: it matched security
+    research, news articles, and this repository's own documentation, and carried
+    almost no signal about the sender's intent."
+level: low
