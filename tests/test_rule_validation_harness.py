@@ -32,8 +32,17 @@ def _rule():
 
 
 def test_extract_phrases_finds_every_selection():
-    phrases = extract_phrases(_rule())
-    assert set(phrases) == {"persona_swap", "restriction_removal", "fiction_launder"}
+    """The harness must track the rule, not a copy of it.
+
+    Asserting a hardcoded selection list would mean every edit to the rule breaks
+    this test for no reason - and worse, it would let the harness silently skip a
+    newly added selection. Derive the expectation from the rule itself.
+    """
+    rule = _rule()
+    phrases = extract_phrases(rule)
+    expected = {name for name, sel in rule.selections.items() if isinstance(sel, dict)}
+    assert set(phrases) == expected
+    assert expected, "the rule should define at least one selection"
     assert all(phrases.values()), "every selection should yield at least one phrase"
 
 

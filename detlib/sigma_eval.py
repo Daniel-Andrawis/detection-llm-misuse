@@ -6,6 +6,8 @@ malicious sample events and stays quiet on the benign ones:
 
 * named selections whose keys are ANDed together;
 * the ``|contains`` field modifier (case-insensitive substring match);
+* the ``|gt`` / ``|gte`` / ``|lt`` / ``|lte`` numeric modifiers, so structural
+  rules can compare counts and sizes rather than matching vocabulary;
 * plain equality (case-insensitive) when no modifier is given;
 * list values, treated as OR within a single field;
 * a ``condition`` built from selection names, ``and`` / ``or`` / ``not`` and
@@ -17,12 +19,22 @@ answer, so the rules can't drift away from what the evaluator actually checks.
 
 from __future__ import annotations
 
+import operator
 import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+_NUMERIC_OPS = {
+    "gt": operator.gt,
+    "gte": operator.ge,
+    "lt": operator.lt,
+    "lte": operator.le,
+}
+_NUMERIC_MODIFIERS = frozenset(_NUMERIC_OPS)
+_SUPPORTED_MODIFIERS = _NUMERIC_MODIFIERS | {"contains"}
 
 _TOKEN_RE = re.compile(r"\s*(\(|\)|\band\b|\bor\b|\bnot\b|[A-Za-z_][A-Za-z0-9_]*)")
 
@@ -39,14 +51,37 @@ def _match_field(event: dict[str, Any], field_expr: str, values: Any) -> bool:
     haystack = str(raw)
     candidates = [str(v) for v in _as_list(values)]
 
-    unknown = set(modifiers) - {"contains"}
+    unknown = set(modifiers) - _SUPPORTED_MODIFIERS
     if unknown:
         raise ValueError(f"unsupported Sigma modifier(s): {sorted(unknown)}")
+
+    numeric = set(modifiers) & _NUMERIC_MODIFIERS
+    if numeric:
+        if len(numeric) > 1:
+            raise ValueError(f"conflicting numeric modifiers: {sorted(numeric)}")
+        return _match_numeric(raw, numeric.pop(), _as_list(values), field)
 
     if "contains" in modifiers:
         haystack_lower = haystack.lower()
         return any(v.lower() in haystack_lower for v in candidates)
     return any(haystack.lower() == v.lower() for v in candidates)
+
+
+def _match_numeric(raw: Any, modifier: str, values: list[Any], field: str) -> bool:
+    """Structural rules compare counts and sizes, not substrings.
+
+    A field that is absent has already been handled by the caller. A field that is
+    present but not numeric is a schema error in the event, not a non-match, so it
+    raises rather than silently failing closed and hiding the bad data.
+    """
+    try:
+        observed = float(raw)
+    except (TypeError, ValueError):
+        raise ValueError(
+            f"field {field!r} must be numeric for the {modifier!r} modifier, got {raw!r}"
+        ) from None
+    op = _NUMERIC_OPS[modifier]
+    return any(op(observed, float(v)) for v in values)
 
 
 def _match_selection(event: dict[str, Any], selection: Any) -> bool:
@@ -68,6 +103,10 @@ class _ConditionParser:
 
     @staticmethod
     def _tokenize(condition: str) -> list[str]:
+        # A condition written as a folded or literal YAML scalar arrives with
+        # newlines and trailing whitespace. That is valid Sigma, so normalise it
+        # rather than refusing to parse a rule that other engines accept.
+        condition = " ".join(condition.split())
         tokens: list[str] = []
         pos = 0
         while pos < len(condition):
