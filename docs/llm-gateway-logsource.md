@@ -84,27 +84,40 @@ events:
 | `principal_ip` | `principal.ip` |
 | `endpoint` | `target.url` |
 
-## Two tagging gaps found while validating
+## A tagging gap found while validating
 
-Running `sigma check` against these rules surfaces two problems that a logsource
+Running `sigma check` against these rules surfaces one problem that a logsource
 alone does not fix:
 
-1. **There is no `atlas.` tag namespace.** Tagging a rule with
-   `atlas.aml.t0051` raises `InvalidNamespaceTagIssue`. MITRE ATLAS is the
-   framework for adversarial ML, so detections on this surface have nowhere
-   standard to record which technique they cover. Sigma's taxonomy needs an
-   `atlas.` namespace, or an agreed convention for referencing ATLAS IDs.
+**There is no `atlas.` tag namespace.** Tagging a rule with `atlas.aml.t0051`
+raises `InvalidNamespaceTagIssue`. The namespaces defined in
+`sigma-appendix-tags.md` are `attack`, `car`, `cve`, `d3fend`, `detection`,
+`stp`, and `tlp`. MITRE ATLAS is the framework for adversarial machine learning,
+so detections on this surface have nowhere standard to record which technique
+they cover, and the ATLAS ID ends up in `references` or a comment where no tool
+can read it. Sigma's taxonomy needs an `atlas.` namespace, or an agreed
+convention for referencing ATLAS IDs.
 
-2. **ATT&CK tactic tags are rejected for these rules.** `attack.defense_evasion`
-   and `attack.defense-evasion` both raise `InvalidATTACKTagIssue`, while
-   `attack.execution` and technique IDs such as `attack.t1059` validate cleanly.
-   Multi-word tactic tags need a documented form.
-
-The deeper version of problem 1 is not Sigma's to solve. Anthropic's threat
+The deeper version of the problem is not Sigma's to solve. Anthropic's threat
 intelligence team, mapping a year of AI-enabled cyber activity to ATT&CK,
 reported that *"there is no ATT&CK ID for this type of agentic orchestration"*.
 Framework coverage for AI-enabled attacker behaviour is genuinely incomplete, and
 detection content is running ahead of the taxonomies used to describe it.
+
+### A note on ATT&CK tactic tags
+
+While validating the above, these rules were found to be tagged
+`attack.defense_evasion`, which is wrong twice over: Sigma tactic tags are
+hyphenated, and MITRE has since **renamed TA0005 from "Defense Evasion" to
+"Stealth"**. The correct tag today is `attack.stealth`, and the rules were
+updated accordingly on 2026-09-01.
+
+Worth recording because the spec disagrees with the tooling here.
+`sigma-appendix-tags.md` v2.1.0 still lists `defense-evasion` and omits
+`stealth`, `reconnaissance`, `resource-development`, and `defense-impairment`.
+pySigma 1.5.0 carries the current ATT&CK data and is correct. A rule tagged
+according to the published specification therefore fails validation. Reported
+upstream.
 
 ## Open questions
 

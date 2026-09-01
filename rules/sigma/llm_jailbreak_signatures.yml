@@ -27,7 +27,7 @@ date: 2026-07-24
 modified: 2026-09-01
 tags:
   - atlas.aml.t0054          # LLM Jailbreak (verify ID against live ATLAS matrix)
-  - attack.defense_evasion
+  - attack.stealth
 logsource:
   product: llm_gateway
   service: inference_api

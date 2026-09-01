@@ -15,7 +15,7 @@ date: 2026-07-24
 modified: 2026-09-01
 tags:
   - atlas.aml.t0051          # LLM Prompt Injection (verify ID against live ATLAS matrix)
-  - attack.initial_access
+  - attack.initial-access
 logsource:
   product: llm_gateway
   service: inference_api
