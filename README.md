@@ -122,6 +122,8 @@ content, and composing them with **benign** targets only.
 Requires the `experiments` extra installed in the venv and your own API credentials;
 `--dry-run` needs neither and prints every prompt without sending anything.
 
+Writeup: [I tested my own detection rule and it failed](https://daniel-andrawis.github.io/posts/i-tested-my-own-detection-rule.html).
+
 **First result (2026-09-01, `claude-sonnet-5`, 126 trials):** the phrase list produced
 zero refusals and zero soft declines, but the model named and dismissed the framing in
 9 of 126 responses. The phrases are neither live nor inert - they are *recognised and
