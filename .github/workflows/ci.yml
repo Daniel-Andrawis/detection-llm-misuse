@@ -26,3 +26,10 @@ jobs:
 
       - name: Test (pytest)
         run: pytest -q
+
+      # The README tells readers to convert these with sigma-cli. Enforce that
+      # claim rather than asserting it: `sigma check` exits non-zero on rule and
+      # condition errors, so a rule that would not parse for a downstream user
+      # fails the build here first.
+      - name: Validate Sigma rules (sigma-cli)
+        run: sigma check rules/sigma/

@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 dependencies = ["PyYAML>=6.0"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.5"]
+dev = ["pytest>=8.0", "ruff>=0.5", "sigma-cli>=1.0"]
 # Only needed to run the live experiments under experiments/ — the rules, the
 # evaluator, and the whole test suite work without it.
 experiments = ["anthropic>=0.40"]
