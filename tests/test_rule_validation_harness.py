@@ -2,7 +2,7 @@
 
 The harness makes real API calls, so nothing here touches the network. What is worth
 testing is that the prompts it builds are grammatical and still match the rule they
-were derived from — if composition silently mangles a phrase, the experiment measures
+were derived from - if composition silently mangles a phrase, the experiment measures
 the mangling instead of the phrase.
 """
 

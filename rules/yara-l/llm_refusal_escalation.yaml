@@ -20,7 +20,7 @@ rule llm_refusal_escalation {
     author       = "Daniel Andrawis"
     description  = "One API key reformulating repeatedly after model refusals in a short window (bypass probing, vocabulary-independent)."
     severity     = "MEDIUM"
-    mitre_atlas  = "AML.T0054"  // LLM Jailbreak — verify against live ATLAS matrix
+    mitre_atlas  = "AML.T0054"  // LLM Jailbreak - verify against live ATLAS matrix
     reference    = "https://atlas.mitre.org/techniques/AML.T0054"
     status       = "experimental"
     data_source  = "llm_gateway"

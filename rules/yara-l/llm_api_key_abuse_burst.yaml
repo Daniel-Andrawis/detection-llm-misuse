@@ -14,7 +14,7 @@ rule llm_api_key_abuse_burst {
     author       = "Daniel Andrawis"
     description  = "Single source IP fanning high-volume LLM inference across many distinct API keys in a short window (automated abuse / credential rotation)."
     severity     = "MEDIUM"
-    mitre_atlas  = "AML.T0040"  // ML Model Inference API Access — verify against live ATLAS matrix
+    mitre_atlas  = "AML.T0040"  // ML Model Inference API Access - verify against live ATLAS matrix
     reference    = "https://atlas.mitre.org/techniques/AML.T0040"
     status       = "experimental"
     data_source  = "llm_gateway"

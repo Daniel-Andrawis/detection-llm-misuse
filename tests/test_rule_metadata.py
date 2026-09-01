@@ -30,7 +30,7 @@ def test_sigma_rule_metadata(path: Path):
     # id must be a real UUID
     uuid.UUID(str(rule["id"]))
 
-    # must cite a technique — an ATT&CK or ATLAS tag
+    # must cite a technique - an ATT&CK or ATLAS tag
     assert any(str(t).startswith(("attack.", "atlas.")) for t in rule["tags"]), (
         f"{path.name} has no attack./atlas. technique tag"
     )

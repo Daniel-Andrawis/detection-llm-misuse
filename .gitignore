@@ -25,5 +25,5 @@ env/
 .idea/
 .vscode/
 
-# Research logs — force-add deliberately when publishing a finding
+# Research logs - force-add deliberately when publishing a finding
 experiments/**/results/*.jsonl

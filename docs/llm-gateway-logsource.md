@@ -46,7 +46,7 @@ A gateway claiming this logsource should emit the following. Fields marked
 
 | Field | Type | Notes |
 |---|---|---|
-| `prompt` | string | The user-supplied prompt body. **Privacy-sensitive** — see below. |
+| `prompt` | string | The user-supplied prompt body. **Privacy-sensitive** - see below. |
 | `prompt_chars` | integer | **Required.** Length of the prompt body in characters. |
 | `prompt_turn_markers` | integer | **Required.** Count of role delimiters (`Human:`, `Assistant:`, `User:`, chat-template equivalents) found inside a *single* prompt body. This is the field that makes many-shot scaffolding detectable. |
 
@@ -61,7 +61,7 @@ all-or-nothing privacy decision; this one does not.
 
 | Field | Type | Notes |
 |---|---|---|
-| `stop_reason` | string | **Required.** The API's own terminal state — `end_turn`, `refusal`, `max_tokens`, `tool_use`, `stop_sequence`. |
+| `stop_reason` | string | **Required.** The API's own terminal state - `end_turn`, `refusal`, `max_tokens`, `tool_use`, `stop_sequence`. |
 | `stop_details.category` | string | Refusal category where the API supplies one. |
 | `model_requested` | string | What the caller asked for. |
 | `model_served` | string | What actually served it. These differ under aliasing and the difference matters when reading a finding months later. |
@@ -119,9 +119,9 @@ detection content is running ahead of the taxonomies used to describe it.
 
 ## References
 
-- SigmaHQ specification — <https://github.com/SigmaHQ/sigma-specification>
-- MITRE ATLAS — <https://atlas.mitre.org/>
+- SigmaHQ specification - <https://github.com/SigmaHQ/sigma-specification>
+- MITRE ATLAS - <https://atlas.mitre.org/>
 - Anthropic, *What we learned mapping a year's worth of AI-enabled cyber threats*
-- Anthropic, *Many-shot jailbreaking* — <https://www.anthropic.com/research/many-shot-jailbreaking>
-- Shen et al., *"Do Anything Now"*, ACM CCS 2024 — <https://arxiv.org/abs/2308.03825>
-- WildTeaming — <https://arxiv.org/abs/2406.18510>
+- Anthropic, *Many-shot jailbreaking* - <https://www.anthropic.com/research/many-shot-jailbreaking>
+- Shen et al., *"Do Anything Now"*, ACM CCS 2024 - <https://arxiv.org/abs/2308.03825>
+- WildTeaming - <https://arxiv.org/abs/2406.18510>

@@ -2,7 +2,7 @@ rule llm_training_data_extraction_session {
 
   // Detection intent:
   // A single API key running a sustained, high-volume session whose responses
-  // return an abnormally large total volume of output — consistent with bulk
+  // return an abnormally large total volume of output - consistent with bulk
   // model/data extraction (e.g. divergence attacks, "repeat verbatim" looping,
   // or systematic corpus reconstruction) rather than interactive use.
   //
@@ -14,7 +14,7 @@ rule llm_training_data_extraction_session {
     author       = "Daniel Andrawis"
     description  = "Single API key with sustained high request volume and abnormally large total output within a session (bulk model / training-data extraction)."
     severity     = "HIGH"
-    mitre_atlas  = "AML.T0057"  // LLM Data Leakage — verify against live ATLAS matrix
+    mitre_atlas  = "AML.T0057"  // LLM Data Leakage - verify against live ATLAS matrix
     reference    = "https://atlas.mitre.org/techniques/AML.T0057"
     status       = "experimental"
     data_source  = "llm_gateway"

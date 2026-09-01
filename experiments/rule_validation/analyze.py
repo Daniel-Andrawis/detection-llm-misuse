@@ -70,7 +70,7 @@ def main() -> int:
 
     ok = [t for t in trials if not t.get("error")]
     if not ok:
-        print("\nEvery call errored — nothing to compare.")
+        print("\nEvery call errored - nothing to compare.")
         return 1
 
     # Control baseline, per target, so each scaffold is compared against the same ask.

@@ -213,7 +213,7 @@ def run(args: argparse.Namespace) -> int:
     except Exception as exc:
         print(f"Could not construct client: {exc}", file=sys.stderr)
         print(
-            "Set ANTHROPIC_API_KEY, or run `ant auth login` — the SDK reads either.",
+            "Set ANTHROPIC_API_KEY, or run `ant auth login` - the SDK reads either.",
             file=sys.stderr,
         )
         return 1
