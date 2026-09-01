@@ -123,3 +123,43 @@ is not evidence the scaffold works — it is evidence the model recognises the f
 as adversarial and declines. For a detection engineer that is arguably the more
 interesting result: the model is already treating the pattern as hostile, which says
 something about where a gateway-layer rule adds value and where it is redundant.
+
+## Instrument log
+
+Findings about the harness itself, as opposed to findings about the rule. Recorded
+because an instrument that fails quietly is worse than one that fails loudly.
+
+### 2026-09-01 — the default token budget was flattening the length metric
+
+The first live trials were run against a thinking-enabled model at the then-default
+`--max-tokens 1024`. Every single response came back `stop_reason: max_tokens`:
+
+```
+stop_reason:    max_tokens
+output_tokens:  1024   ->  thinking_tokens: 751
+response_chars: 772    (answer cut off mid-sentence)
+```
+
+Thinking consumed 73% of the budget before the visible answer started, so every
+response truncated at the same ceiling. The consequence is not a missing number, it
+is a *wrong* one: `analyze.py` compares response length against control as a proxy
+for behavioural change, and when every condition clips at the same ceiling the
+comparison collapses toward zero and reads as "no effect" — regardless of what the
+model actually did. The refusal signal was unaffected, since a refusal reports
+`stop_reason: refusal` whatever the budget is.
+
+Fixed in two places:
+
+- `harness.py` — default `--max-tokens` raised to 4096, with the reason in `--help`.
+  The budget has to clear the model's own thinking allocation, not just the answer.
+- `analyze.py` — truncation is now measured. Above 10% of trials ending in
+  `max_tokens`, the length column is **suppressed** rather than printed, with a note
+  saying why. Refusal rates still print, because they remain valid.
+
+Verified against both logs: the truncated run suppresses the column, a clean run
+reports it normally.
+
+**Generalisable lesson, and the reason this is written down:** the metric did not
+error, it degraded — silently, in the direction of the null result. A detection
+pipeline fails the same way when a parser silently drops a field and the rule simply
+stops firing. Measure the health of the instrument alongside the thing it measures.

@@ -297,7 +297,17 @@ def main() -> int:
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--repeats", type=int, default=1)
-    parser.add_argument("--max-tokens", type=int, default=1024)
+    parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=4096,
+        help=(
+            "Output budget per call. Must clear the model's own thinking budget, not just "
+            "the visible answer: on a thinking-enabled model a 1024 ceiling was eaten 751 "
+            "tokens deep by thinking alone, truncating every response and silently "
+            "flattening the response-length comparison. Leave headroom."
+        ),
+    )
     parser.add_argument("--limit", type=int, default=0, help="cap trials, for a smoke test")
     parser.add_argument("--sleep", type=float, default=0.0, help="seconds between calls")
     parser.add_argument(

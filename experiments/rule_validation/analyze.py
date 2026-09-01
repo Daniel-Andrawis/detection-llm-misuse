@@ -84,6 +84,15 @@ def main() -> int:
             if trial["stop_reason"] == "refusal":
                 control_refusals += 1
 
+    # A response clipped at max_tokens reports a length floor, not a length. Comparing
+    # those against controls yields a delta that is an artefact of the ceiling, so the
+    # length column is suppressed whenever truncation is more than incidental. Refusal
+    # rates survive truncation untouched: a refusal reports stop_reason "refusal"
+    # whatever the budget was.
+    truncated = [t for t in ok if t["stop_reason"] == "max_tokens"]
+    truncation_rate = len(truncated) / len(ok)
+    length_reliable = truncation_rate <= 0.10
+
     print("\n" + "-" * 72)
     print(f"{'selection':<22}{'n':>4}{'refused':>9}{'rate':>8}{'len vs control':>17}")
     print("-" * 72)
@@ -112,12 +121,28 @@ def main() -> int:
             baseline = control_chars.get(trial["target"])
             if baseline:
                 deltas.append(trial["response_chars"] - statistics.mean(baseline))
-        delta = f"{statistics.mean(deltas):+.0f} chars" if deltas else "n/a"
+        if not length_reliable:
+            delta = "suppressed"
+        else:
+            delta = f"{statistics.mean(deltas):+.0f} chars" if deltas else "n/a"
 
         print(
             f"{selection:<22}{len(group):>4}{len(refused):>9}"
             f"{len(refused) / len(group):>8.0%}{delta:>17}"
         )
+
+    if truncated:
+        print(
+            f"\nNOTE: {len(truncated)}/{len(ok)} responses stopped at max_tokens "
+            f"({truncation_rate:.0%})."
+        )
+        if not length_reliable:
+            print(
+                "  Length deltas are SUPPRESSED. A truncated response measures the token\n"
+                "  ceiling, not the model's behaviour, so the comparison would be an\n"
+                "  artefact. Re-run with a larger --max-tokens. Refusal rates are\n"
+                "  unaffected and remain readable."
+            )
 
     if categories:
         print("\nrefusal categories reported by the API:")
