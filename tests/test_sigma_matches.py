@@ -23,6 +23,10 @@ CASES = {
         "jailbreak_malicious.jsonl",
         "jailbreak_benign.jsonl",
     ),
+    "llm_many_shot_scaffolding.yml": (
+        "many_shot_malicious.jsonl",
+        "many_shot_benign.jsonl",
+    ),
 }
 
 

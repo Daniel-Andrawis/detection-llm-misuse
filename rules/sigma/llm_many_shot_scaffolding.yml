@@ -1,0 +1,45 @@
+title: Many-Shot Jailbreak Scaffolding in a Single Prompt
+id: 4c7e1f92-6b30-4a5d-9e18-7f3a2b6c8d40
+status: experimental
+description: >
+  Detects the structural shape of a many-shot jailbreak: a single prompt padded
+  with a large number of faux human/assistant dialogue turns, used to overwhelm
+  safety training via in-context learning rather than via any particular wording.
+  This rule matches no vocabulary at all. It keys on the count of turn delimiters
+  and the size of the payload, so it does not decay when attacker phrasing
+  changes - which is the failure mode measured in experiments/rule_validation.
+  Requires an LLM gateway that emits `prompt_turn_markers` (count of role
+  delimiters found in the prompt body) and `prompt_chars`. See
+  docs/llm-gateway-logsource.md for the field contract.
+references:
+  - https://www.anthropic.com/research/many-shot-jailbreaking
+  - https://atlas.mitre.org/techniques/AML.T0054
+  - https://arxiv.org/abs/2406.18510
+author: Daniel Andrawis
+date: 2026-09-01
+modified: 2026-09-01
+tags:
+  - atlas.aml.t0054          # LLM Jailbreak (verify ID against live ATLAS matrix)
+  - attack.defense_evasion
+logsource:
+  product: llm_gateway
+  service: inference_api
+detection:
+  many_shot_dialogue:
+    prompt_turn_markers|gte: 12
+    prompt_chars|gte: 5000
+  condition: many_shot_dialogue
+falsepositives:
+  - Legitimate few-shot prompting. This is the dominant false positive and the
+    reason the turn threshold is 12 rather than 5 - production few-shot prompts
+    typically carry fewer than ten exemplars. Tune the threshold against your own
+    observed distribution before enabling; a deployment whose customers routinely
+    send 20-shot prompts needs a higher bound or a per-customer baseline.
+  - Long documents that happen to be transcripts (interviews, chat logs, support
+    threads) submitted for summarisation. These clear the size bound easily and
+    can clear the turn bound too. Excluding known summarisation endpoints, or
+    requiring the delimiters to be evenly distributed, reduces this class.
+  - Agent frameworks that replay conversation history into a single completion
+    call. Whether this is a false positive depends on your architecture; if you
+    run one, baseline it before deploying.
+level: medium

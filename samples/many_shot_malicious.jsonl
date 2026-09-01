@@ -1,0 +1,3 @@
+{"timestamp": "2026-09-01T09:14:02Z", "api_key_id": "sha256:cc31", "principal_ip": "198.51.100.24", "prompt_turn_markers": 64, "prompt_chars": 41200, "endpoint": "/v1/messages"}
+{"timestamp": "2026-09-01T09:14:48Z", "api_key_id": "sha256:cc31", "principal_ip": "198.51.100.24", "prompt_turn_markers": 128, "prompt_chars": 96400, "endpoint": "/v1/messages"}
+{"timestamp": "2026-09-01T09:16:03Z", "api_key_id": "sha256:cc31", "principal_ip": "198.51.100.24", "prompt_turn_markers": 13, "prompt_chars": 5240, "endpoint": "/v1/messages"}

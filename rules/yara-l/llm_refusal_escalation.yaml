@@ -1,0 +1,51 @@
+rule llm_refusal_escalation {
+
+  // Detection intent:
+  // One API key repeatedly reformulating a request after the model declines it.
+  // A user who asks once, is refused, and stops is a normal user. A user who is
+  // refused four or more times inside half an hour and keeps rewriting is
+  // probing for a bypass, and the reformulation loop is the attack - not any
+  // particular wording inside it.
+  //
+  // This rule matches no vocabulary. That is deliberate. Phrase-keyed jailbreak
+  // rules decay as attacker vocabulary moves; the escalation *structure* is a
+  // property of the adversary's process and survives the vocabulary shift.
+  // See experiments/rule_validation for the measurement that motivated it.
+  //
+  // Log model: LLM gateway access logs normalized to UDM NETWORK_HTTP events.
+  // The gateway is expected to emit a hashed key identifier and the API's own
+  // stop_reason in additional.fields. See docs/llm-gateway-logsource.md.
+
+  meta:
+    author       = "Daniel Andrawis"
+    description  = "One API key reformulating repeatedly after model refusals in a short window (bypass probing, vocabulary-independent)."
+    severity     = "MEDIUM"
+    mitre_atlas  = "AML.T0054"  // LLM Jailbreak — verify against live ATLAS matrix
+    reference    = "https://atlas.mitre.org/techniques/AML.T0054"
+    status       = "experimental"
+    data_source  = "llm_gateway"
+
+  events:
+    $e.metadata.event_type = "NETWORK_HTTP"
+    re.regex($e.target.url, `/v1/(chat/completions|messages|complete)$`)
+    $e.additional.fields["api_key_id"] = $key
+    $e.additional.fields["api_key_id"] != ""
+
+  match:
+    $key over 30m
+
+  outcome:
+    $total_requests = count($e.metadata.id)
+    $refusals       = count_distinct(
+                        if($e.additional.fields["stop_reason"] = "refusal", $e.metadata.id, "")
+                      )
+    // Persistence past a refusal is the signal. A high ratio of continued
+    // requests to refusals means the user is not taking no for an answer.
+    $risk_score = max(
+      if($refusals >= 8, 85, 0),
+      if($refusals >= 4, 60, 0)
+    )
+
+  condition:
+    $e and $refusals >= 4 and $total_requests > $refusals
+}
